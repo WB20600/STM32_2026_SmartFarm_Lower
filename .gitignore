@@ -1,0 +1,33 @@
+# Build outputs
+Debug/
+Release/
+Objects/
+Listings/
+build/
+cmake-build-*/
+
+# Keil / MDK generated files
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.map
+*.lst
+*.lnp
+*.htm
+*.build_log.htm
+*.uvguix.*
+*.scvd
+
+# Logs / temp
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code local settings
+.vscode/
