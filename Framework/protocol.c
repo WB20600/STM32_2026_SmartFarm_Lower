@@ -20,6 +20,7 @@ static const CmdEntry CMD_TABLE[] = {
     { CMD_STOP, Motion_OnStop,     0              },
     { CMD_MODE, Motion_OnMode,     &g_motion_en   },
     { CMD_PING, Sys_OnPing,        0              },
+		{ CMD_PID,  Motion_OnPid,      &g_motion_en   },
     { CMD_ARM,  Actuator_OnArm,    &g_actuator_en },
     { CMD_GRP,  Actuator_OnGrip,   &g_actuator_en },
     { CMD_FIRE, Actuator_OnFire,   &g_actuator_en },

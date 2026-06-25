@@ -45,19 +45,18 @@ int main(void)
 
     beep_on_times(2, 100);
 		
-		 /* Single wheel PID test: closed-loop C wheel only. */
+		     /* PID zero-speed test: all wheels target 0. */
     {
-        uint8_t closed_loop[8] = {1};  // data[0] = 1: use PID closed-loop
-        uint8_t four_wheels[8] = {0};
+        uint8_t closed_loop[8] = {1};
+        uint8_t zero_speed[8] = {0};
 
-        wr_be16(&four_wheels[0], 250);  // A wheel = +200
-        wr_be16(&four_wheels[2], 100);  // B wheel = +200
-        wr_be16(&four_wheels[4], 250);  // C wheel = +200
-        wr_be16(&four_wheels[6], 100);  // D wheel = +200
-				
+        wr_be16(&zero_speed[0], 0);  // A = 0
+        wr_be16(&zero_speed[2], 0);  // B = 0
+        wr_be16(&zero_speed[4], 0);  // C = 0
+        wr_be16(&zero_speed[6], 0);  // D = 0
 
         Motion_OnMode(closed_loop);
-        Motion_OnSpd(four_wheels);
+        Motion_OnSpd(zero_speed);
     }
 
     while (1) {

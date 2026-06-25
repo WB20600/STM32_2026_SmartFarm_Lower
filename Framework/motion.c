@@ -1,5 +1,6 @@
 #include "motion.h"
 #include "protocol.h"
+#include "y_motor.h"
 
 extern void MOTOR_A_SetSpeed(int16_t s);
 extern void MOTOR_B_SetSpeed(int16_t s);
@@ -65,6 +66,41 @@ void Motion_OnMode(const uint8_t *d)
     __disable_irq();
     s_closed_pending = d[0] ? 1 : 0;
     s_mode_dirty = 1;
+    __enable_irq();
+}
+
+static void Motion_SetOnePid(PID *pid, float kp, float ki, float kd)
+{
+    pid->Kp = kp;
+    pid->Ki = ki;
+    pid->Kd = kd;
+    pid->LastError = 0;
+    pid->LLastError = 0;
+    pid->iIncpid = 0;
+}
+
+void Motion_OnPid(const uint8_t *d)
+{
+    float kp = (float)be16(&d[0]) / 10.0f;
+    float ki = (float)be16(&d[2]) / 10.0f;
+    float kd = (float)be16(&d[4]) / 10.0f;
+    uint8_t motor = d[6];
+
+    __disable_irq();
+
+    if (motor == 0 || motor == 1) {
+        Motion_SetOnePid(&A_SpeedPID, kp, ki, kd);
+    }
+    if (motor == 0 || motor == 2) {
+        Motion_SetOnePid(&B_SpeedPID, kp, ki, kd);
+    }
+    if (motor == 0 || motor == 3) {
+        Motion_SetOnePid(&C_SpeedPID, kp, ki, kd);
+    }
+    if (motor == 0 || motor == 4) {
+        Motion_SetOnePid(&D_SpeedPID, kp, ki, kd);
+    }
+
     __enable_irq();
 }
 

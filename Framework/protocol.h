@@ -12,6 +12,7 @@
 #define CMD_STOP  0x02
 #define CMD_MODE  0x03
 #define CMD_PING  0x04
+#define CMD_PID   0x05
 
 #define CMD_ARM   0x10
 #define CMD_GRP   0x11
