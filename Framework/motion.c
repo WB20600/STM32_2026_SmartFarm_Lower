@@ -2,16 +2,12 @@
 #include "protocol.h"
 #include "y_motor.h"
 
-extern void MOTOR_A_SetSpeed(int16_t s);
-extern void MOTOR_B_SetSpeed(int16_t s);
-extern void MOTOR_C_SetSpeed(int16_t s);
-extern void MOTOR_D_SetSpeed(int16_t s);
-extern void MOTOR_A_SetSpeed_Close(float aim, float enc);
-extern void MOTOR_B_SetSpeed_Close(float aim, float enc);
-extern void MOTOR_C_SetSpeed_Close(float aim, float enc);
-extern void MOTOR_D_SetSpeed_Close(float aim, float enc);
-
 volatile uint8_t g_motion_en = 1;
+volatile uint32_t g_pid_start_cycle = 0;
+volatile uint32_t g_pid_end_cycle = 0;
+volatile uint32_t g_pid_elapsed_cycle = 0;
+volatile uint32_t g_pid_max_cycle = 0;
+volatile uint32_t g_pid_measure_count = 0;
 
 static volatile int16_t s_target_active[4] = {0, 0, 0, 0};
 static volatile int16_t s_target_pending[4] = {0, 0, 0, 0};
@@ -74,9 +70,7 @@ static void Motion_SetOnePid(PID *pid, float kp, float ki, float kd)
     pid->Kp = kp;
     pid->Ki = ki;
     pid->Kd = kd;
-    pid->LastError = 0;
-    pid->LLastError = 0;
-    pid->iIncpid = 0;
+    PID_Reset(pid);
 }
 
 void Motion_OnPid(const uint8_t *d)
@@ -106,7 +100,10 @@ void Motion_OnPid(const uint8_t *d)
 
 void Motion_SpeedLoop(void)
 {
-    int16_t target[4];
+    uint32_t pid_start;
+    uint32_t pid_end;
+    uint32_t pid_elapsed;
+	  int16_t target[4];
     uint8_t closed;
     int16_t ea = encGet(TIM2), eb = encGet(TIM3), ec = encGet(TIM4), ed = encGet(TIM5);
 
@@ -137,10 +134,24 @@ void Motion_SpeedLoop(void)
      * Bench test showed raw A/C positive and raw B/D negative are forward.
      */
     if (closed) {
-        MOTOR_A_SetSpeed_Close( (float)target[0], (float)ea);
-        MOTOR_B_SetSpeed_Close(-(float)target[1], (float)(-eb));
-        MOTOR_C_SetSpeed_Close( (float)target[2], (float)ec);
-        MOTOR_D_SetSpeed_Close(-(float)target[3], (float)(-ed));
+        pid_start = DWT->CYCCNT;
+
+        /* Temporary diagnostic: invert A encoder feedback. */
+        MOTOR_A_SetSpeed_Close( (float)target[0], (float)(-ea), MOTION_SPEED_LOOP_DT_S);
+        MOTOR_B_SetSpeed_Close(-(float)target[1], (float)(-eb), MOTION_SPEED_LOOP_DT_S);
+        MOTOR_C_SetSpeed_Close( (float)target[2], (float)(-ec),    MOTION_SPEED_LOOP_DT_S);
+        MOTOR_D_SetSpeed_Close(-(float)target[3], (float)(-ed), MOTION_SPEED_LOOP_DT_S);
+
+        pid_end = DWT->CYCCNT;
+        pid_elapsed = pid_end - pid_start;
+
+        g_pid_start_cycle = pid_start;
+        g_pid_end_cycle = pid_end;
+        g_pid_elapsed_cycle = pid_elapsed;
+        if (pid_elapsed > g_pid_max_cycle) {
+            g_pid_max_cycle = pid_elapsed;
+        }
+        g_pid_measure_count++;
     } else {
         MOTOR_A_SetSpeed( target[0]);
         MOTOR_B_SetSpeed(-target[1]);

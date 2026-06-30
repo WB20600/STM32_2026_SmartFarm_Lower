@@ -24,6 +24,11 @@ int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SysTickConfig();
+	 
+	  /* Enable Cortex-M4 DWT cycle counter. */
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
     GPIO_LED_int();
     BEEP_Init();
@@ -50,10 +55,10 @@ int main(void)
         uint8_t closed_loop[8] = {1};
         uint8_t zero_speed[8] = {0};
 
-        wr_be16(&zero_speed[0], 0);  // A = 0
-        wr_be16(&zero_speed[2], 0);  // B = 0
-        wr_be16(&zero_speed[4], 0);  // C = 0
-        wr_be16(&zero_speed[6], 0);  // D = 0
+        wr_be16(&zero_speed[0], 10);  // A = 0
+        wr_be16(&zero_speed[2], 10);  // B = 0
+        wr_be16(&zero_speed[4], 10);  // C = 0
+        wr_be16(&zero_speed[6], 10);  // D = 0
 
         Motion_OnMode(closed_loop);
         Motion_OnSpd(zero_speed);
@@ -66,9 +71,9 @@ int main(void)
         if (Scheduler_TakeOdoFlag()) {
             Telemetry_SendOdo();
         }
-        if (Scheduler_TakeBatFlag()) {
-            Telemetry_SendBat();
-        }
+//        if (Scheduler_TakeBatFlag()) {
+//            Telemetry_SendBat();
+//        }
         if (Scheduler_TakeActuatorFlag()) {
             Actuator_Tick();
         }

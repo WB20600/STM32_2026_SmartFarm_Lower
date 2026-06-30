@@ -7,16 +7,17 @@
 
 typedef struct
 {
-    float SumError;
     float Kp;
     float Ki;
     float Kd;
     float LastError;
     float LLastError;
-    float iIncpid;
+    float IntegralOut;
+    float Output;
+    float IntegralMax;
+    float OutputMax;
     float errormax;
     float errormin;
-    float Imax;
 } PID;
 
 extern PID A_SpeedPID;
@@ -27,7 +28,8 @@ extern PID D_SpeedPID;
 extern int Z_step;
 extern int Y_step;
 
-float IncPIDCalc(PID *sptr, float Setpoint, float Turepoint);
+void PID_Reset(PID *sptr);
+float IncPIDCalc(PID *sptr, float Setpoint, float Turepoint, float dt_s);
 void PID_int(void);
 
 void MOTOR_A_SetSpeed(int16_t speed);
@@ -35,10 +37,10 @@ void MOTOR_B_SetSpeed(int16_t speed);
 void MOTOR_C_SetSpeed(int16_t speed);
 void MOTOR_D_SetSpeed(int16_t speed);
 
-void MOTOR_A_SetSpeed_Close(float speed, float SpeedA);
-void MOTOR_B_SetSpeed_Close(float speed, float SpeedB);
-void MOTOR_C_SetSpeed_Close(float speed, float SpeedC);
-void MOTOR_D_SetSpeed_Close(float speed, float SpeedD);
+void MOTOR_A_SetSpeed_Close(float speed, float SpeedA, float dt_s);
+void MOTOR_B_SetSpeed_Close(float speed, float SpeedB, float dt_s);
+void MOTOR_C_SetSpeed_Close(float speed, float SpeedC, float dt_s);
+void MOTOR_D_SetSpeed_Close(float speed, float SpeedD, float dt_s);
 
 void Stepper_Motor_Run_1(int32_t num);
 void Stepper_Motor_Run_2(int32_t num);

@@ -51,7 +51,7 @@ void TIM6_DAC_IRQHandler(void)
     t++;
     s_protocol_flag = 1;
 
-    if (t % 5 == 0) {
+    if (t % MOTION_SPEED_LOOP_PERIOD_MS == 0) {
         Motion_SpeedLoop();
     }
     if (t % 20 == 0) {

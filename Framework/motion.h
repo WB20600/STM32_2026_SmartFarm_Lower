@@ -3,7 +3,15 @@
 
 #include "stm32f4xx.h"
 
+#define MOTION_SPEED_LOOP_PERIOD_MS  5U
+#define MOTION_SPEED_LOOP_DT_S       0.005f
+
 extern volatile uint8_t g_motion_en;
+extern volatile uint32_t g_pid_start_cycle;
+extern volatile uint32_t g_pid_end_cycle;
+extern volatile uint32_t g_pid_elapsed_cycle;
+extern volatile uint32_t g_pid_max_cycle;
+extern volatile uint32_t g_pid_measure_count;
 
 void Motion_Init(void);
 void Motion_OnSpd(const uint8_t *d);
